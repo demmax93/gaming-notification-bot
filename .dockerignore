@@ -1,0 +1,7 @@
+.idea
+app
+documentation
+src
+cache/docker
+lost+found
+app_data

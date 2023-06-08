@@ -7,7 +7,7 @@ plugins {
     kotlin("plugin.spring") version "1.6.21"
 }
 
-group = "ru.devmark"
+group = "ru.demmax93"
 version = "1.0.0"
 java.sourceCompatibility = JavaVersion.VERSION_17
 
@@ -25,7 +25,6 @@ dependencies {
 
 tasks.withType<KotlinCompile> {
     kotlinOptions {
-        freeCompilerArgs = listOf("-Xjsr305=strict")
         jvmTarget = "17"
     }
 }
