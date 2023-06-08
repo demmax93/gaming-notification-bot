@@ -56,6 +56,8 @@ docker start ${CONTAINER_NAME} -a
 
 echo ""
 echo "Copying build result..."
+mkdir cache
+mkdir cache/maven
 docker cp "${CONTAINER_NAME}:/tmp/build" "$(pwd)/cache/maven/build"
 ls -la "$(pwd)/cache/maven/build/."
 

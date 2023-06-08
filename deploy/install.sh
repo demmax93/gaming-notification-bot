@@ -27,21 +27,21 @@ fi
 cat <<EOF >> start.sh
 #!/bin/bash
 cd "\$(dirname "\$0")" || exit 1
-docker-compose up -d
+sudo docker compose up -d
 EOF
 ls -la start.sh
 
 cat <<EOF >> stop.sh
 #!/bin/bash
 cd "\$(dirname "\$0")" || exit 1
-docker-compose down
+sudo docker compose down
 EOF
 ls -la stop.sh
 
 cat <<EOF >> restart.sh
 #!/bin/bash
 cd "\$(dirname "\$0")" || exit 1
-docker-compose down && docker-compose up -d
+sudo docker-compose down && sudo docker compose up -d
 EOF
 ls -la restart.sh
 
