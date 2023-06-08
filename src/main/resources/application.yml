@@ -1,0 +1,3 @@
+telegram:
+  botName: gaming_notification_bot
+  token: ${TOKEN}
