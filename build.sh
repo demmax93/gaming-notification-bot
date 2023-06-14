@@ -20,6 +20,7 @@ if [ -d "app" ]; then
   rm -rf app_data
   mkdir app_data
   mv app/docker-compose.yaml app_data/docker-compose.yaml
+  mv app/details.json app_data/details.json
   rm -rf app
   echo "App removed"
 fi
@@ -85,6 +86,7 @@ echo ""
 echo "### Restoring previous app data ###"
 if [ -d "app_data" ]; then
   mv app_data/docker-compose.yaml app/docker-compose.yaml
+  mv app_data/details.json app/details.json
   ls -la app
 fi
 

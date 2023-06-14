@@ -20,6 +20,8 @@ services:
     ports:
       - 8080
       - 5555
+    volumes:
+      - ./details.json:/app/details.json
 EOF
   ls -la docker-compose.yaml
 fi
