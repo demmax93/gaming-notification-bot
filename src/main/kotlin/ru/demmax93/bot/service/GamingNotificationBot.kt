@@ -104,7 +104,7 @@ class GamingNotificationBot(
         }
     }
 
-    @Scheduled(cron = "0 5 15 ? * MON-FRI", zone = "Europe/Samara")
+    @Scheduled(cron = "0 0 18 ? * MON-FRI", zone = "Europe/Samara")
     fun sendWorkDaysPollByCron() {
         sendPoll(optionsWorkDays)
     }
