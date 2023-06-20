@@ -60,7 +60,7 @@ class GamingNotificationBot(
             if (!poll.isClosed && poll.totalVoterCount == users.size) {
                 val details = jsonConverterService.readFromFile()
                 if (poll.options.stream().anyMatch { option -> dayOff == option.text && option.voterCount > 0 }) {
-                    sendMessage(gamingOffMessage.format(users.joinToString()))
+                    sendMessageAndClosePoll(gamingOffMessage.format(users.joinToString()))
                 } else {
                     val gamingTime = poll.options.stream()
                         .filter { option -> dayOff != option.text && option.voterCount > 0 }
@@ -70,18 +70,17 @@ class GamingNotificationBot(
                         var gameTime = LocalDateTime.now(ZoneId.of("Europe/Samara"))
                         val gameHours = extractHours(gamingTime.get().text).toInt()
                         gameTime = gameTime.withHour(gameHours).withMinute(0).withSecond(0)
-                        val taskId = manualTaskScheduleService.addNewTask({ sendMessage(users.joinToString()) },
+                        val taskId = manualTaskScheduleService.addNewTask({ sendMessageAndClosePoll(users.joinToString()) },
                             Date.from(gameTime.toInstant(ZoneOffset.of("+4"))))
                         if (details != null) {
+                            if (details.taskId != 0) {
+                                manualTaskScheduleService.removeTaskFromScheduler(details.taskId)
+                            }
                             details.scheduledTime = gameTime
                             details.taskId = taskId
                             jsonConverterService.writeToFile(details)
                         }
                     }
-                }
-                if (details != null && details.messageId != 0) {
-                    val stopPoll = StopPoll(myGroupId.toString(), details.messageId)
-                    execute(stopPoll)
                 }
             }
         }
@@ -132,6 +131,23 @@ class GamingNotificationBot(
         jsonConverterService.writeToFile(PollDetails(0, null, 0))
     }
 
+    fun sendMessageAndClosePoll(responseText: String) {
+        val details = jsonConverterService.readFromFile()
+        if (details != null) {
+            closePoll(details)
+        }
+        sendMessage(responseText)
+    }
+
+    private fun closePoll(details: PollDetails) {
+        if (details.messageId != 0) {
+            val stopPoll = StopPoll(myGroupId.toString(), details.messageId)
+            execute(stopPoll)
+            details.messageId = 0
+            jsonConverterService.writeToFile(details)
+        }
+    }
+
     fun sendMessage(responseText: String) {
         val message = SendMessage(myGroupId.toString(), responseText)
         execute(message)
@@ -143,7 +159,9 @@ class GamingNotificationBot(
 
     private fun cancelTodayGame(): String {
         val details = jsonConverterService.readFromFile()
-        if (details != null && details.taskId != 0) {
+            ?: return "Не могу найти что нужно закенцелить, похоже и так не играем!"
+        closePoll(details)
+        if (details.taskId != 0) {
             manualTaskScheduleService.removeTaskFromScheduler(details.taskId)
             details.taskId = 0
             jsonConverterService.writeToFile(details)
@@ -167,8 +185,8 @@ class GamingNotificationBot(
                 manualTaskScheduleService.removeTaskFromScheduler(details.taskId)
             }
             if (details.scheduledTime != null) {
-                var gameTime = details.scheduledTime!!.withMinute(minutesToDelay)
-                val newTaskId = manualTaskScheduleService.addNewTask({ sendMessage(users.joinToString()) },
+                val gameTime = details.scheduledTime!!.withMinute(minutesToDelay)
+                val newTaskId = manualTaskScheduleService.addNewTask({ sendMessageAndClosePoll(users.joinToString()) },
                     Date.from(gameTime.toInstant(ZoneOffset.of("+4"))))
                 details.scheduledTime = gameTime
                 details.taskId = newTaskId
