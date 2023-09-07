@@ -60,7 +60,7 @@ class GamingNotificationBot(
             if (!poll.isClosed && poll.totalVoterCount == users.size) {
                 val details = jsonConverterService.readFromFile()
                 if (poll.options.stream().anyMatch { option -> dayOff == option.text && option.voterCount > 0 }) {
-                    sendMessageAndClosePoll(gamingOffMessage.format(users.joinToString()))
+                    sendMessage(gamingOffMessage.format(users.joinToString()))
                 } else {
                     val gamingTime = poll.options.stream()
                         .filter { option -> dayOff != option.text && option.voterCount > 0 }
@@ -128,6 +128,10 @@ class GamingNotificationBot(
 
     @Scheduled(cron = "0 0 0 * * ?", zone = "Europe/Samara")
     fun cleanUpPollDetails() {
+        val details = jsonConverterService.readFromFile()
+        if (details != null) {
+            closePoll(details)
+        }
         jsonConverterService.writeToFile(PollDetails(0, null, 0))
     }
 
