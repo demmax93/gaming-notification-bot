@@ -48,6 +48,19 @@ class GamingNotificationBot(
         "Эй, любители игр! Кто сегодня настроен поиграть?",
         "Приветствую, друзья геймеры! Кто хочет сегодня поиграть вместе?"
     )
+    private final val birthDayCongratulation = "%s, С Днём Рождения!) \n%s"
+    private final val birthDayCongratulations = setOf(
+        "Желаем каток победных больше, киллов сочных побольше, винрейт чтобы рос экспотанциально))",
+        "Мы надеемся, что ваш килл-счет будет расти, сочные убийства будут прибавляться, и ваш винрейт будет стремительно расти!))",
+        "Пожелаем больше побед в катках, более значительных убийств и винрейт, который будет только возрастать))",
+        "Желаем вам много побед в катках, огромное количество успешных убийств и рост вашего винрейта в геометрической прогрессии!))",
+        "Пожелаем вам больше побед в рейтинге, много крутых убийств и экспоненциальный рост ваших показателей винрейта))",
+        "Пусть рандом приносит вам все больше побед, а киллы становятся более впечатляющими, при этом винрейт стремительно растет))",
+        "Желаем вам больше побед в катках, максимум сочных убийств и экспоненциальный рост вашей эффективности))",
+        "Пусть у вас будет больше победных каток, убийств с насыщенным опытом и винрейт, который растет в геометрической прогрессии))",
+        "Мы надеемся, что вы будете чаще побеждать в катках, совершать более впечатляющие убийства и набирать винрейт экспоненциально))",
+        "Пожелаем вам больше побед в катках, более качественных убийств и рост ваших показателей винрейта, идущий вверх в геометрической прогрессии))"
+    )
 
     @Value("\${telegram.botName}")
     private val botName: String = ""
@@ -111,6 +124,21 @@ class GamingNotificationBot(
     @Scheduled(cron = "0 0 14 ? * SAT,SUN", zone = "Europe/Samara")
     fun sendWeekEndDaysPollByCron() {
         sendPoll(optionsWeekDays)
+    }
+    
+    @Scheduled(cron = "0 0 12 25 9 ? *", zone = "Europe/Samara")
+    fun sendBirthDayForRoman() {
+        sendMessage(birthDayCongratulation.format("@Welcome_LjAPb", birthDayCongratulations.random()))
+    }
+
+    @Scheduled(cron = "0 0 12 18 11 ? *", zone = "Europe/Samara")
+    fun sendBirthDayForYurii() {
+        sendMessage(birthDayCongratulation.format("@yurazavrazhnov", birthDayCongratulations.random()))
+    }
+
+    @Scheduled(cron = "0 0 12 1 4 ? *", zone = "Europe/Samara")
+    fun sendBirthDayForMaks() {
+        sendMessage(birthDayCongratulation.format("@demmax93", birthDayCongratulations.random()))
     }
 
     private fun sendPoll(options: List<String>) {
