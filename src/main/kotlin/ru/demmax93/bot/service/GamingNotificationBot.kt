@@ -126,7 +126,7 @@ class GamingNotificationBot(
         sendPoll(optionsWeekDays)
     }
     
-    @Scheduled(cron = "0 15 12 25 9 ?", zone = "Europe/Samara")
+    @Scheduled(cron = "0 0 12 25 9 ?", zone = "Europe/Samara")
     fun sendBirthDayForRoman() {
         sendMessage(birthDayCongratulation.format("@Welcome_LjAPb", birthDayCongratulations.random()))
     }
