@@ -126,17 +126,17 @@ class GamingNotificationBot(
         sendPoll(optionsWeekDays)
     }
     
-    @Scheduled(cron = "0 0 12 25 9 ? *", zone = "Europe/Samara")
+    @Scheduled(cron = "0 15 12 25 9 ?", zone = "Europe/Samara")
     fun sendBirthDayForRoman() {
         sendMessage(birthDayCongratulation.format("@Welcome_LjAPb", birthDayCongratulations.random()))
     }
 
-    @Scheduled(cron = "0 0 12 18 11 ? *", zone = "Europe/Samara")
+    @Scheduled(cron = "0 0 12 18 11 ?", zone = "Europe/Samara")
     fun sendBirthDayForYurii() {
         sendMessage(birthDayCongratulation.format("@yurazavrazhnov", birthDayCongratulations.random()))
     }
 
-    @Scheduled(cron = "0 0 12 1 4 ? *", zone = "Europe/Samara")
+    @Scheduled(cron = "0 0 12 1 4 ?", zone = "Europe/Samara")
     fun sendBirthDayForMaks() {
         sendMessage(birthDayCongratulation.format("@demmax93", birthDayCongratulations.random()))
     }
