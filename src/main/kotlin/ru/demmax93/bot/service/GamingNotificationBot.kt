@@ -25,7 +25,7 @@ class GamingNotificationBot(
     private final val dayOff = "Не играем!"
     private final val gamingTimeMessage = "%s\nСегодня играем в %s!"
     private final val gamingOffMessage = "%s\nСегодня не играем!"
-    private final val gamingDelayMessage = "%s\nНачинаем играть на %s минут позже!"
+    private final val gamingDelayMessage = "%s\nНачинаем играть позже, в %s!"
     private final val optionsWorkDays = listOf("20:00", "21:00", "22:00", dayOff)
     private final val optionsWeekDays = listOf("16:00", "17:00", "18:00", "19:00", "20:00", "21:00", "22:00", dayOff)
     private final val questions = setOf(
@@ -104,7 +104,8 @@ class GamingNotificationBot(
                 when {
                     messageText.startsWith("/help") -> "Доступтные команды:\n" +
                             "/cancel - отменена игровой сессии сегодня\n" +
-                            "/delay {number of minutes} - перенос сегодняшней игровой сессии на количество минут указанные после команды (доступно значения от 1 до 59)."
+                            "/delay {number of minutes} - перенос сегодняшней игровой сессии на количество минут указанные после команды (значение должно быть больше 0)." +
+                            "При нескольких переносах, время будет суммироваться, т.е. перенос на 10 минит и ещё на 15 минут, датут в общей сложности перенос на 25 минут"
                     messageText.startsWith("/cancel") -> cancelTodayGame()
                     messageText.startsWith("/delay") -> delayTodayGame(messageText)
                     else -> ""
@@ -184,25 +185,25 @@ class GamingNotificationBot(
 
     private fun delayTodayGame(text: String): String {
         val minutesToDelay = try {
-            text.removePrefix("/delay").trim().toInt()
+            text.removePrefix("/delay").trim().toLong()
         } catch (exception: Exception) {
             return "Не смог разобрать число которое вы ввели, попробуйте ещё раз"
         }
-        if (minutesToDelay < 1 || minutesToDelay > 59) {
-            return "Введенное число не подходит, оно должно быть от 1 до 59"
+        if (minutesToDelay < 1) {
+            return "Введенное число не подходит, оно должно быть больше 0"
         }
         val details = jsonConverterService.readFromFile()
         if (details.scheduledTime == null) {
             return "Не могу найти время которое нужно перенести, похоже ещё не определились!"
         }
         removeTask(details)
-        val gameTime = details.scheduledTime!!.withMinute(minutesToDelay)
+        val gameTime = details.scheduledTime!!.plusMinutes(minutesToDelay)
         val newTaskId = manualTaskScheduleService.addNewTask(
             { sendMessage(users.joinToString()) },
             Date.from(gameTime.toInstant(ZoneOffset.of("+4")))
         )
         updateJsonFile(details, details.messageId, gameTime, newTaskId)
-        return gamingDelayMessage.format(users.joinToString(), minutesToDelay)
+        return gamingDelayMessage.format(users.joinToString(), gameTime.hour.toString() + ":" + gameTime.minute.toString())
     }
 
     private fun updateJsonFile(
