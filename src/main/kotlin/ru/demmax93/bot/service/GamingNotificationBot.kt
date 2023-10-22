@@ -104,7 +104,7 @@ class GamingNotificationBot(
                 when {
                     messageText.startsWith("/help") -> "Доступтные команды:\n" +
                             "/cancel - отменена игровой сессии сегодня\n" +
-                            "/delay {number of minutes} - перенос сегодняшней игровой сессии на количество минут указанные после команды (доступно значения от 1 дл 59)."
+                            "/delay {number of minutes} - перенос сегодняшней игровой сессии на количество минут указанные после команды (доступно значения от 1 до 59)."
                     messageText.startsWith("/cancel") -> cancelTodayGame()
                     messageText.startsWith("/delay") -> delayTodayGame(messageText)
                     else -> ""
@@ -193,7 +193,7 @@ class GamingNotificationBot(
         }
         val details = jsonConverterService.readFromFile()
         if (details.scheduledTime == null) {
-            return "Не могу найти что нужно перенести, похоже ещё не определились!"
+            return "Не могу найти время которое нужно перенести, похоже ещё не определились!"
         }
         removeTask(details)
         val gameTime = details.scheduledTime!!.withMinute(minutesToDelay)
