@@ -75,7 +75,8 @@ class GamingNotificationBot(
             if (!poll.isClosed && poll.totalVoterCount == users.size) {
                 val details = jsonConverterService.readFromFile()
                 if (poll.options.stream().anyMatch { option -> dayOff == option.text && option.voterCount > 0 }) {
-                    details?.let { removeTask(it) }
+                    removeTask(details)
+                    updateJsonFile(details, details.messageId, details.scheduledTime, 0)
                     sendMessage(gamingOffMessage.format(users.joinToString()))
                 } else {
                     val gamingTime = poll.options.stream()
@@ -90,10 +91,8 @@ class GamingNotificationBot(
                             { sendMessage(users.joinToString()) },
                             Date.from(gameTime.toInstant(ZoneOffset.of("+4")))
                         )
-                        if (details != null) {
-                            removeTask(details)
-                            updateJsonFile(details, details.messageId, gameTime, taskId)
-                        }
+                        removeTask(details)
+                        updateJsonFile(details, details.messageId, gameTime, taskId)
                     }
                 }
             }
@@ -151,17 +150,17 @@ class GamingNotificationBot(
             .build()
         sendMessage(users.joinToString())
         val response = execute(poll)
-        jsonConverterService.writeToFile(PollDetails(response.messageId, null, 0))
+        updateJsonFile(jsonConverterService.readFromFile(), response.messageId, null, 0)
     }
 
     @Scheduled(cron = "0 0 0 * * ?", zone = "Europe/Samara")
     fun cleanUpPollDetails() {
         val details = jsonConverterService.readFromFile()
-        if (details != null && details.messageId != 0) {
+        if (details.messageId != 0) {
             val stopPoll = StopPoll(myGroupId.toString(), details.messageId)
             execute(stopPoll)
         }
-        jsonConverterService.writeToFile(PollDetails(0, null, 0))
+        updateJsonFile(details,0, null, 0)
     }
 
     fun sendMessage(responseText: String) {
@@ -175,11 +174,11 @@ class GamingNotificationBot(
 
     private fun cancelTodayGame(): String {
         val details = jsonConverterService.readFromFile()
-            ?: return "Не могу найти что нужно закенцелить, похоже и так не играем!"
         if (details.taskId == 0) {
             return "Не могу найти что нужно закенцелить, похоже и так не играем!"
         }
         removeTask(details)
+        updateJsonFile(details, details.messageId, details.scheduledTime, 0)
         return gamingOffMessage.format(users.joinToString())
     }
 
@@ -193,7 +192,7 @@ class GamingNotificationBot(
             return "Введенное число не подходит, оно должно быть от 1 до 59"
         }
         val details = jsonConverterService.readFromFile()
-        if (details?.scheduledTime == null) {
+        if (details.scheduledTime == null) {
             return "Не могу найти что нужно перенести, похоже ещё не определились!"
         }
         removeTask(details)
@@ -223,6 +222,5 @@ class GamingNotificationBot(
             return
         }
         manualTaskScheduleService.removeTaskFromScheduler(details.taskId)
-        updateJsonFile(details, details.messageId, details.scheduledTime, 0)
     }
 }

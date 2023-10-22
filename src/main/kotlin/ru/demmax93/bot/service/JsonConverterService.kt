@@ -21,7 +21,7 @@ class JsonConverterService {
         }
     }
 
-    fun readFromFile(): PollDetails? {
+    fun readFromFile(): PollDetails {
         val path = "./details.json"
         try {
             val mapper = jacksonObjectMapper().registerModule(JavaTimeModule())
@@ -29,7 +29,7 @@ class JsonConverterService {
         } catch (e: IOException) {
             e.printStackTrace()
         }
-        return null
+        return PollDetails(0, null, 0)
     }
 
 }
