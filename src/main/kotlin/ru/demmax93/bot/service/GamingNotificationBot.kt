@@ -198,8 +198,7 @@ class GamingNotificationBot(
             return "Не могу найти время которое нужно перенести, похоже ещё не определились!"
         }
         removeTask(details)
-        val gameTime = if (minutesToDelay > 0) details.scheduledTime!!.plusMinutes(minutesToDelay)
-            else details.scheduledTime!!.minusMinutes(minutesToDelay)
+        val gameTime = details.scheduledTime!!.plusMinutes(minutesToDelay)
         val newTaskId = manualTaskScheduleService.addNewTask(
             { sendMessage(users.joinToString()) },
             Date.from(gameTime.toInstant(ZoneOffset.of("+4")))
