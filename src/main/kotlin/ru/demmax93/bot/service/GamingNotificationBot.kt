@@ -12,6 +12,7 @@ import ru.demmax93.bot.entity.PollDetails
 import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.ZoneOffset
+import java.time.format.DateTimeFormatter
 import java.util.*
 
 @Service
@@ -51,7 +52,8 @@ class GamingNotificationBot(
         "Приветствую, друзья геймеры! Кто хочет сегодня поиграть вместе?"
     )
     private final val birthDayCongratulation = "%s, С Днём Рождения!) \n%s"
-    private final val birthDayCongratulations = setOf(
+    private final val happyNewYearCongratulation = "%s, С Новым Годом!) \n%s"
+    private final val congratulations = setOf(
         "Желаем каток победных больше, киллов сочных побольше, винрейт чтобы рос экспотанциально))",
         "Мы надеемся, что ваш килл-счет будет расти, сочные убийства будут прибавляться, и ваш винрейт будет стремительно расти!))",
         "Пожелаем больше побед в катках, более значительных убийств и винрейт, который будет только возрастать))",
@@ -63,6 +65,7 @@ class GamingNotificationBot(
         "Мы надеемся, что вы будете чаще побеждать в катках, совершать более впечатляющие убийства и набирать винрейт экспоненциально))",
         "Пожелаем вам больше побед в катках, более качественных убийств и рост ваших показателей винрейта, идущий вверх в геометрической прогрессии))"
     )
+    private final val hourAndMinutesFormatter = DateTimeFormatter.ofPattern("HH:mm")
 
     @Value("\${telegram.botName}")
     private val botName: String = ""
@@ -130,17 +133,22 @@ class GamingNotificationBot(
 
     @Scheduled(cron = "0 0 12 25 9 ?", zone = "Europe/Samara")
     fun sendBirthDayForRoman() {
-        sendMessage(birthDayCongratulation.format("@Welcome_LjAPb", birthDayCongratulations.random()))
+        sendMessage(birthDayCongratulation.format("@Welcome_LjAPb", congratulations.random()))
     }
 
     @Scheduled(cron = "0 0 12 18 11 ?", zone = "Europe/Samara")
     fun sendBirthDayForYurii() {
-        sendMessage(birthDayCongratulation.format("@yurazavrazhnov", birthDayCongratulations.random()))
+        sendMessage(birthDayCongratulation.format("@yurazavrazhnov", congratulations.random()))
     }
 
     @Scheduled(cron = "0 0 12 1 4 ?", zone = "Europe/Samara")
     fun sendBirthDayForMaks() {
-        sendMessage(birthDayCongratulation.format("@demmax93", birthDayCongratulations.random()))
+        sendMessage(birthDayCongratulation.format("@demmax93", congratulations.random()))
+    }
+
+    @Scheduled(cron = "0 0 0 1 1 ?", zone = "Europe/Samara")
+    fun sendHappyNewYear() {
+        sendMessage(happyNewYearCongratulation.format(users.joinToString(), congratulations.random()))
     }
 
     private fun sendPoll(options: List<String>) {
@@ -204,7 +212,7 @@ class GamingNotificationBot(
             Date.from(gameTime.toInstant(ZoneOffset.of("+4")))
         )
         updateJsonFile(details, details.messageId, gameTime, newTaskId)
-        return gamingDelayMessage.format(users.joinToString(), gameTime.hour.toString() + ":" + gameTime.minute.toString())
+        return gamingDelayMessage.format(users.joinToString(), gameTime.format(hourAndMinutesFormatter))
     }
 
     private fun updateJsonFile(
