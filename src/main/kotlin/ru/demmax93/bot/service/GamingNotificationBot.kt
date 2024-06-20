@@ -66,6 +66,7 @@ class GamingNotificationBot(
         "Пожелаем вам больше побед в катках, более качественных убийств и рост ваших показателей винрейта, идущий вверх в геометрической прогрессии))"
     )
     private final val hourAndMinutesFormatter = DateTimeFormatter.ofPattern("HH:mm")
+    private var isSuspended = false
 
     @Value("\${telegram.botName}")
     private val botName: String = ""
@@ -106,12 +107,16 @@ class GamingNotificationBot(
                 val messageText = message.text
                 when {
                     messageText.startsWith("/help") -> "Доступтные команды:\n" +
-                            "/cancel - отменена игровой сессии сегодня\n" +
+                            "/cancel - отменена игровой сессии сегодня.\n" +
                             "/delay {number of minutes} - перенос сегодняшней игровой сессии на количество минут указанные после команды (значение должно быть не равно 0)." +
                             "При нескольких переносах, время будет суммироваться, т.е. перенос на 10 минит и ещё на 15 минут, датут в общей сложности перенос на 25 минут." +
-                            "Так же можно вычитать минуты."
+                            "Так же можно вычитать минуты.\n" +
+                            "/suspend - приостонавливает работу Gaming Notification Bot до выполения команды /resume. При выполнение команды текущая сессия будет отменина.\n" +
+                            "/resume - возобновляет работу Gaming Notification Bot после команды /suspend."
                     messageText.startsWith("/cancel") -> cancelTodayGame()
                     messageText.startsWith("/delay") -> delayTodayGame(messageText)
+                    messageText.startsWith("/suspend") -> suspendBot()
+                    messageText.startsWith("/resume") -> resumeBot()
                     else -> ""
                 }
             } else ""
@@ -161,6 +166,22 @@ class GamingNotificationBot(
         sendMessage(users.joinToString())
         val response = execute(poll)
         updateJsonFile(jsonConverterService.readFromFile(), response.messageId, null, 0)
+    }
+
+    private fun suspendBot() : String {
+        if (!isSuspended) {
+            cleanUpPollDetails()
+            cancelTodayGame()
+            isSuspended = true
+        }
+        return "Работа Gaming Notification Bot была приостановлена"
+    }
+
+    private fun resumeBot() : String {
+        if (isSuspended) {
+            isSuspended = false
+        }
+        return "Работа Gaming Notification Bot была возобновлена"
     }
 
     @Scheduled(cron = "0 0 0 * * ?", zone = "Europe/Samara")
