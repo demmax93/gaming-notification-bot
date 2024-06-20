@@ -157,6 +157,9 @@ class GamingNotificationBot(
     }
 
     private fun sendPoll(options: List<String>) {
+        if (isSuspended) {
+            return
+        }
         val poll = SendPoll.builder()
             .chatId(myGroupId)
             .question(questions.random())
